@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Gun
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Gun
-  <Sprite>k__BackingField: {fileID: 0}
+  <Sprite>k__BackingField: {fileID: 21300000, guid: 9e1e74e69b360df4682474ecb0dddcd6, type: 3}
   <CanStack>k__BackingField: 0
   <MaxItemsInStack>k__BackingField: 1
-  <Weight>k__BackingField: 0
+  <Weight>k__BackingField: 1
   _propertiesModifiers: []
   <Damage>k__BackingField: 1
   <AmmoType>k__BackingField: {fileID: 11400000, guid: d1d8d7025c1bcf044bc822be0f71e490, type: 2}

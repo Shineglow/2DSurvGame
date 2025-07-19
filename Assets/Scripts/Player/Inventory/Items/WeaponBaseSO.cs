@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Player.Inventory.Items
 {
 	[CreateAssetMenu(menuName = "2DSurvGame/Items/WeaponBase", fileName = "WeaponBase")]
-	public class WeaponBaseSO : AbstractItemBaseSO
+	public class WeaponBaseSO : EquipmentBaseSO
 	{
 		[field: SerializeField] public float Damage { get; private set; }
 		[field: SerializeField] public AmmoSO AmmoType { get; private set; }

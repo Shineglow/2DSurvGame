@@ -2,41 +2,43 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Events;
-using Player.Inventory;
+using Inventory;
 using Player.Inventory.Items;
 using Player.Wallet;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-namespace Inventory
+namespace Player.Inventory
 {
 	[CreateAssetMenu(menuName = "2DSurvGame/Global/Inventory", fileName = "Inventory")]
 	public class InventorySO : ScriptableObject
 	{
-		[SerializeField] private InventoryConfigurationSO _configuration;
+		[SerializeField] private InventoryConfigurationSO configuration;
 		[SerializeField] private List<SlotInfo> slots;
 		public IReadOnlyList<SlotInfo> Slots => slots;
 			
 		[field: SerializeField] public int ActiveSlotsCount { get; private set; }
 
-		[SerializeField] private EventSO _buySlotEvent;
-		[SerializeField] private InventorySlotAdd _inventorySlotAddEvent;
-		[SerializeField] private WalletSO _wallet;
+		[SerializeField] private EventSO buySlotEvent;
+		[SerializeField] private InventorySlotAdd inventorySlotAddEvent;
+		[SerializeField] private WalletSO wallet;
 		
 		public float TotalWeight { get; private set; }
 		[SerializeField] private EventSO<float, float> totalWeightChangedEvent;
+		[SerializeField] private EventSO<SlotInfo> slotUpdated;
 
 		private void Awake()
 		{
-			_buySlotEvent.Subscribe(BuySlot, 100);
-			ActiveSlotsCount = _configuration.DefaultSize;
+			buySlotEvent.Subscribe(BuySlot, 100);
+			ActiveSlotsCount = configuration.DefaultSize;
 		}
 
 		private void BuySlot()
 		{
-			if (_wallet.TrySpendCoins(_configuration.AdditionalSlotCost))
+			if (wallet.TrySpendCoins(configuration.AdditionalSlotCost))
 			{
 				slots[ActiveSlotsCount].Reset();
-				_inventorySlotAddEvent.Invoke(slots[ActiveSlotsCount], ActiveSlotsCount);
+				inventorySlotAddEvent.Invoke(slots[ActiveSlotsCount], ActiveSlotsCount);
 				ActiveSlotsCount++;
 			}
 		}
@@ -58,6 +60,7 @@ namespace Inventory
 				foreach (var slotInfo in slots.Where(i => abstractItemBase == null))
 				{
 					slotInfo.Place(abstractItemBase);
+					slotUpdated.Invoke(slotInfo);
 					itemsToPlace--;
 				}
 			}
@@ -85,6 +88,7 @@ namespace Inventory
 				foreach (var slotInfo in slotsWithConsumables)
 				{
 					cashback = slotInfo.Get(cashback.count);
+					slotUpdated.Invoke(slotInfo);
 					if (cashback.count == 0)
 					{
 						break;
@@ -106,6 +110,34 @@ namespace Inventory
 		{
 			return IsSlotActive(slots.IndexOf(slotInfo));
 		}
+
+		public void RemoveItem(AbstractItemBaseSO equipment)
+		{
+			var slot = slots.FirstOrDefault(i => ReferenceEquals(i.AbstractItemBase, equipment));
+			if (slot == null)
+			{
+				Debug.LogError("There is no such item in the inventory.");
+			}
+			else
+			{
+				slot.Reset();
+				slotUpdated.Invoke(slot);
+			}
+		}
+		
+		public void RemoveItem(int index)
+		{
+			var slot = slots.ElementAtOrDefault(index);
+			if (slot == null)
+			{
+				Debug.LogError("Index out of range. Can not find inventory slot.");
+			}
+			else
+			{
+				slot.Reset();
+				slotUpdated.Invoke(slot);
+			}
+		}
 	}
 
 	[Serializable]
@@ -114,8 +146,6 @@ namespace Inventory
 		[field: SerializeField] public AbstractItemBaseSO AbstractItemBase { get; private set;}
 		[field: SerializeField] public int Count { get; private set;}
 
-		public event Action SlotUpdated;
-
 		public (AbstractItemBaseSO item, int count) Place((AbstractItemBaseSO item, int count) items)
 		{
 			return Place(items.item, items.count);
@@ -123,17 +153,15 @@ namespace Inventory
 		
 		public (AbstractItemBaseSO item, int count) Place(AbstractItemBaseSO abstractItem, int count = 1)
 		{
-			(AbstractItemBaseSO item, int count) result = (null, -1);
-			if (AbstractItemBase.GetType() == abstractItem.GetType() && AbstractItemBase.CanStack)
+			(AbstractItemBaseSO item, int count) result = (null, 0);
+			if (AbstractItemBase == null)
 			{
-				if (Count + count > AbstractItemBase.MaxItemsInStack)
-				{
-					result = (AbstractItemBase, Count + count % AbstractItemBase.MaxItemsInStack);
-				}
-				else
-				{
-					Count += count;
-				}
+				AbstractItemBase = abstractItem;
+				result = ValueTuple();
+			}
+			else if (AbstractItemBase.GetType() == abstractItem.GetType() && AbstractItemBase.CanStack)
+			{
+				result = ValueTuple();
 			}
 			else
 			{
@@ -141,8 +169,21 @@ namespace Inventory
 				Count = Count;
 				AbstractItemBase = abstractItem;
 			}
-			SlotUpdated?.Invoke();
 			return result;
+
+			(AbstractItemBaseSO item, int count) ValueTuple()
+			{
+				if (Count + count > AbstractItemBase.MaxItemsInStack)
+				{
+					result = (AbstractItemBase, AbstractItemBase.MaxItemsInStack - (Count + count));
+				}
+				else
+				{
+					Count += count;
+				}
+
+				return result;
+			}
 		}
 
 		public (AbstractItemBaseSO item, int count) Get(int count = 1)
@@ -157,7 +198,6 @@ namespace Inventory
 			{
 				result = (AbstractItemBase, count);
 			}
-			SlotUpdated?.Invoke();
 			return result;
 		}
 		

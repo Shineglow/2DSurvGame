@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: ff84d6e4a06988545bdcecbb80425c06
+  m_SerializeEntries:
+  - m_GUID: 00fb1ad276969a04080498c682f17875
+    m_Address: Assets/SOInstances/Items/Weapon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - equipment
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 131b2bc108009ca4bb7a36fd9a7cd9dd
+    m_Address: Assets/SOInstances/Items/Ammo
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ammo
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 23cee37ec2f6ecc418b19a2a3f5f6140
+    m_Address: Assets/SOInstances/Items/Armor
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - equipment
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 452eabc59a0aaa442905adfab675a8f1, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: fa1493f924b0de6489f61462e543cf30, type: 2}
+    - {fileID: 11400000, guid: 4263ba9fc559412418b37e009bd7df80, type: 2}

@@ -1,18 +1,39 @@
-using System.Collections;
 using System.Collections.Generic;
+using Events;
+using Gameplay;
+using Inventory;
+using Player.Inventory;
+using Player.Inventory.Items;
 using UnityEngine;
 
 public class AddBulletsController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private InventorySO inventory;
+    [SerializeField] private EventSO addItemButton;
+    [SerializeField] private string addressablesGroup;
+    [SerializeField] private int count;
+    private IList<AmmoSO> _assets;
+
+    private async void Awake()
     {
-        
+        _assets = await AssetsLoader.LoadAll<AmmoSO>(addressablesGroup);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnEnable()
     {
-        
+        addItemButton.Subscribe(AddItemAction, 1);
+    }
+
+    private void OnDisable()
+    {
+        addItemButton.Unsubscribe(AddItemAction);
+    }
+    
+    private void AddItemAction()
+    {
+        foreach (var ammoSo in _assets)
+        {
+            inventory.TryAddItem(ammoSo, count);
+        }
     }
 }

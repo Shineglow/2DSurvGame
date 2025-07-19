@@ -4,20 +4,19 @@ using UnityEngine;
 
 namespace Properties
 {
-	[Serializable]
-	public class PropertyModifierBase
+	public class PropertyModifierBase : ScriptableObject
 	{
 		[field: SerializeField] public PropertyIdSO Property { get; private set; }
 		[field: SerializeField] public float ModifierValue { get; private set; }
 	}
 
-	[Serializable]
+	[CreateAssetMenu(menuName = "2DSurvGame/Properties/PropertyBaseValueModifier", fileName = "PropertyBaseValueModifier")]
 	public sealed class PropertyBaseValueModifier : PropertyModifierBase
 	{
 		[field: SerializeField] public PropertyBaseModifyActionSO ModifierAction { get; private set; }
 	}
 
-	[Serializable]
+	[CreateAssetMenu(menuName = "2DSurvGame/Properties/PropertyValueModifier", fileName = "PropertyValueModifier")]
 	public sealed class PropertyValueModifier : PropertyModifierBase
 	{
 		[field: SerializeField] public PropertyValueModifyActionSO ModifierAction { get; private set; }

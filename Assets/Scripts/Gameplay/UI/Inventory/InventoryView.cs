@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Events;
 using Inventory;
+using Player.Inventory;
 using UnityEngine;
 
 public class InventoryView : MonoBehaviour
@@ -54,6 +55,7 @@ public class InventoryView : MonoBehaviour
     private void Subscribes()
     {
         buySlotEvent.Subscribe(TryBuySlots, 1);
+        // inventory.
     }
     
     private void Unsubscribes()

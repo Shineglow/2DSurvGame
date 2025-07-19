@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GunAmmo
   m_EditorClassIdentifier: 
   <Name>k__BackingField: GunAmmo
-  <Sprite>k__BackingField: {fileID: 0}
+  <Sprite>k__BackingField: {fileID: 21300000, guid: 4f03b184c778b3a48a59d3897a5fbe33, type: 3}
   <CanStack>k__BackingField: 1
   <MaxItemsInStack>k__BackingField: 50
   <Weight>k__BackingField: 0.01
