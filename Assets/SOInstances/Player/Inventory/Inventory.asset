@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43d7a82882cb4eeca329402972253ade, type: 3}
   m_Name: Inventory
   m_EditorClassIdentifier: 
-  _configuration: {fileID: 11400000, guid: 0ff594c029d1f994db8fe861cf37ad4e, type: 2}
+  configuration: {fileID: 0}
   slots:
-  - <AbstractItemBase>k__BackingField: {fileID: 0}
-    <Count>k__BackingField: 0
-  - <AbstractItemBase>k__BackingField: {fileID: 0}
-    <Count>k__BackingField: 0
+  - <AbstractItemBase>k__BackingField: {fileID: 11400000, guid: d1d8d7025c1bcf044bc822be0f71e490, type: 2}
+    <Count>k__BackingField: 30
+  - <AbstractItemBase>k__BackingField: {fileID: 11400000, guid: 15128b1bbc7e4224892765b27cae0448, type: 2}
+    <Count>k__BackingField: 30
   - <AbstractItemBase>k__BackingField: {fileID: 0}
     <Count>k__BackingField: 0
   - <AbstractItemBase>k__BackingField: {fileID: 0}
@@ -45,7 +45,8 @@ MonoBehaviour:
   - <AbstractItemBase>k__BackingField: {fileID: 0}
     <Count>k__BackingField: 0
   <ActiveSlotsCount>k__BackingField: 15
-  _buySlotEvent: {fileID: 11400000, guid: 7b51c9b4e6851cf4cb1642060acbf11c, type: 2}
-  _inventorySlotAddEvent: {fileID: 11400000, guid: d6f3d1890807a464aaead27cb5bfde6e, type: 2}
-  _wallet: {fileID: 11400000, guid: f5ded70e2f7cae94c94fb8d848fbd51d, type: 2}
+  buySlotEvent: {fileID: 0}
+  inventorySlotAddEvent: {fileID: 0}
+  wallet: {fileID: 0}
   totalWeightChangedEvent: {fileID: 11400000, guid: 932b7351f6ca7d442a78bb3925e585b9, type: 2}
+  slotUpdated: {fileID: 0}
