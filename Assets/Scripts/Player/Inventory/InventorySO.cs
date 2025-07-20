@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Events;
 using Inventory;
 using Player.Inventory.Items;
 using Player.Wallet;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Player.Inventory
 {
@@ -14,7 +14,7 @@ namespace Player.Inventory
 	public class InventorySO : ScriptableObject
 	{
 		[SerializeField] private InventoryConfigurationSO configuration;
-		[SerializeField] private List<SlotInfo> slots;
+		[SerializeField] private List<SlotInfoExtended> slots;
 		public IReadOnlyList<SlotInfo> Slots => slots;
 			
 		[field: SerializeField] public int ActiveSlotsCount { get; private set; }
@@ -27,16 +27,49 @@ namespace Player.Inventory
 		[SerializeField] private EventSO<float, float> totalWeightChangedEvent;
 		[SerializeField] private EventSO<SlotInfo> slotUpdated;
 
+		private void OnValidate()
+		{
+			for (var index = 0; index < slots.Count; index++)
+			{
+				slots[index].Index = index;
+				slotUpdated.Invoke(slots[index]);
+			}
+
+			RecalculateWeight();
+		}
+
 		private void Awake()
 		{
+			ActiveSlotsCount = slots.Count;
+			for (var index = 0; index < slots.Count; index++)
+			{
+				slots[index].Index = index;
+			}
+		}
+
+		private void OnEnable()
+		{
 			buySlotEvent.Subscribe(BuySlot, 100);
-			ActiveSlotsCount = configuration.DefaultSize;
+		}
+		
+		private void OnDisable()
+		{
+			buySlotEvent.Unsubscribe(BuySlot);
 		}
 
 		private void BuySlot()
 		{
 			if (wallet.TrySpendCoins(configuration.AdditionalSlotCost))
 			{
+				if (ActiveSlotsCount + 1 > slots.Count && slots.Count < configuration.InventoryMaxSize)
+				{
+					slots.Add(new());
+				}
+				else
+				{
+					Debug.LogError($"The inventory already has the maximum number of slots.");
+					return;
+				}
 				slots[ActiveSlotsCount].Reset();
 				inventorySlotAddEvent.Invoke(slots[ActiveSlotsCount], ActiveSlotsCount);
 				ActiveSlotsCount++;
@@ -45,30 +78,41 @@ namespace Player.Inventory
 
 		public bool TryAddItem(AbstractItemBaseSO abstractItemBase, int count)
 		{
+			StringBuilder logMessage = new StringBuilder();
 			int itemsToPlace = count;
 			if (abstractItemBase.CanStack)
 			{
 				foreach (var slotInfo in slots.Where(i => i.AbstractItemBase == null || i.AbstractItemBase == abstractItemBase).OrderBy(i => abstractItemBase != null))
 				{
 					var cashback = slotInfo.Place(abstractItemBase, itemsToPlace);
+					logMessage.Append($"{abstractItemBase.Name}x{count-cashback.count} placed into slot {slotInfo.Index}\n");
 					itemsToPlace = cashback.count;
+					slotUpdated.Invoke(slotInfo);
 					if(cashback.count == 0) break;
 				}
 			}
 			else
 			{
-				foreach (var slotInfo in slots.Where(i => abstractItemBase == null))
+				foreach (var slotInfo in slots.Where(i => i.AbstractItemBase == null))
 				{
+					logMessage.Append($"{abstractItemBase.Name} placed into slot {slotInfo.Index}\n");
 					slotInfo.Place(abstractItemBase);
 					slotUpdated.Invoke(slotInfo);
 					itemsToPlace--;
+					if (itemsToPlace == 0) break;
 				}
 			}
 
+			Debug.Log(logMessage);
 			if (itemsToPlace > 0)
 			{
 				Debug.LogError("There is no more space in the inventory.");
 				return false;
+			}
+
+			if (itemsToPlace != count)
+			{
+				RecalculateWeight();
 			}
 
 			return true;
@@ -77,7 +121,8 @@ namespace Player.Inventory
 		public bool TrySpendConsumables(ConsumablesSO consumable, int count)
 		{
 			bool result = false;
-			var slotsWithConsumables = slots.Where(i => i.AbstractItemBase.GetType() == consumable.GetType()).ToList();
+			var slotsWithConsumables = slots.
+									   Where(i => i.AbstractItemBase != null && string.Equals(i.AbstractItemBase.Name, consumable.Name)).ToList();
 			if (slotsWithConsumables.Count < count)
 			{
 				Debug.LogError($"Not enough consumables of type {consumable.Name}");
@@ -96,6 +141,7 @@ namespace Player.Inventory
 				}
 
 				result = true;
+				RecalculateWeight();
 			}
 
 			return result;
@@ -106,22 +152,32 @@ namespace Player.Inventory
 			return index < ActiveSlotsCount;
 		}
 
-		public bool IsSlotActive(SlotInfo slotInfo)
+		public bool IsSlotActive(SlotInfoExtended slotInfo)
 		{
 			return IsSlotActive(slots.IndexOf(slotInfo));
 		}
 
 		public void RemoveItem(AbstractItemBaseSO equipment)
 		{
-			var slot = slots.FirstOrDefault(i => ReferenceEquals(i.AbstractItemBase, equipment));
-			if (slot == null)
+			int index = -1;
+			SlotInfo slotInfo = null;
+			for (int i = 0; i < slots.Count; i++)
+			{
+				if (ReferenceEquals(slots[i].AbstractItemBase, equipment))
+				{
+					index = i;
+					slotInfo = slots[i];
+				}
+			}
+			if (slotInfo == null)
 			{
 				Debug.LogError("There is no such item in the inventory.");
 			}
 			else
 			{
-				slot.Reset();
-				slotUpdated.Invoke(slot);
+				slotInfo.Reset();
+				slotUpdated.Invoke(slotInfo);
+				RecalculateWeight();
 			}
 		}
 		
@@ -134,15 +190,41 @@ namespace Player.Inventory
 			}
 			else
 			{
+				Debug.Log($"{slot.AbstractItemBase.Name}x{slot.Count} was removed from slot {slot.Index}");
 				slot.Reset();
 				slotUpdated.Invoke(slot);
+				RecalculateWeight();
+			}
+		}
+
+		private void RecalculateWeight()
+		{
+			float newWeight = 0;
+			foreach (var slotInfo in slots)
+			{
+				newWeight += slotInfo.AbstractItemBase == null ? 0 : slotInfo.AbstractItemBase.Weight * slotInfo.Count;
+			}
+
+			if (Math.Abs(newWeight - TotalWeight) > 0.00001)
+			{
+				var previousWeight = TotalWeight;
+				TotalWeight = newWeight;
+				totalWeightChangedEvent.Invoke(previousWeight, newWeight);
 			}
 		}
 	}
 
 	[Serializable]
+	public class SlotInfoExtended : SlotInfo
+	{
+		public new int Index { get => index; set => index = value;}
+	}
+	
+	[Serializable]
 	public class SlotInfo
 	{
+		protected int index;
+		public int Index => index;
 		[field: SerializeField] public AbstractItemBaseSO AbstractItemBase { get; private set;}
 		[field: SerializeField] public int Count { get; private set;}
 
@@ -175,7 +257,8 @@ namespace Player.Inventory
 			{
 				if (Count + count > AbstractItemBase.MaxItemsInStack)
 				{
-					result = (AbstractItemBase, AbstractItemBase.MaxItemsInStack - (Count + count));
+					Count = AbstractItemBase.MaxItemsInStack;
+					result = (AbstractItemBase, Count + count - AbstractItemBase.MaxItemsInStack);
 				}
 				else
 				{
@@ -191,12 +274,14 @@ namespace Player.Inventory
 			(AbstractItemBaseSO item, int count) result;
 			if (count >= Count)
 			{
-				result = (AbstractItemBase, Count);
+				Count = 0;
+				result = (AbstractItemBase, count-Count);
 				AbstractItemBase = null;
 			}
 			else
 			{
-				result = (AbstractItemBase, count);
+				Count -= count;
+				result = (AbstractItemBase, 0);
 			}
 			return result;
 		}

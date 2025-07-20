@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Events;
 using UnityEngine;
 
@@ -9,13 +10,13 @@ namespace Player.Wallet
 		[field: SerializeField] private WalletConfigurationSO configuration;
 		[field: SerializeField, Min(0)] public int CoinsCount { get; private set; }
 		private int _oldCoins = -1;
-		[SerializeField] private EventSO<int, int> _walletBalanceChangedEvent;
+		[SerializeField] private GenericIntegerIntegerEvent walletBalanceChangedEvent;
 		
 		private void OnValidate()
 		{
 			CoinsChanged();
 		}
-		
+
 		/// <summary>
 		/// Adds coins up to the maximum the wallet can hold. Returns the difference if more is added than the wallet can hold.
 		/// </summary>
@@ -60,6 +61,7 @@ namespace Player.Wallet
 			{
 				CoinsCount -= spendCount;
 				result = true;
+				CoinsChanged();
 			}
 
 			return result;
@@ -69,7 +71,7 @@ namespace Player.Wallet
 		{
 			if (_oldCoins != CoinsCount)
 			{
-				_walletBalanceChangedEvent.Invoke(_oldCoins, CoinsCount);
+				walletBalanceChangedEvent.Invoke(_oldCoins, CoinsCount);
 				_oldCoins = CoinsCount;
 			}
 		}

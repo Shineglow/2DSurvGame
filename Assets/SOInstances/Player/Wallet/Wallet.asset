@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Wallet
   m_EditorClassIdentifier: 
   configuration: {fileID: 11400000, guid: 60771547e2683574c87cba81fa8a9209, type: 2}
-  <CoinsCount>k__BackingField: 50
-  _walletBalanceChangedEvent: {fileID: 11400000, guid: 3b0450fe443edad409994ab317efc222, type: 2}
+  <CoinsCount>k__BackingField: 570
+  walletBalanceChangedEvent: {fileID: 11400000, guid: 3b0450fe443edad409994ab317efc222, type: 2}

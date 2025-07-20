@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Events;
 using Gameplay;
-using Inventory;
 using Player.Inventory;
 using Player.Inventory.Items;
 using UnityEngine;

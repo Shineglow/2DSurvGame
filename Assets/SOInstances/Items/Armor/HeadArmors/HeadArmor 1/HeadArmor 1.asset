@@ -17,4 +17,5 @@ MonoBehaviour:
   <CanStack>k__BackingField: 0
   <MaxItemsInStack>k__BackingField: 1
   <Weight>k__BackingField: 0.2
-  _propertiesModifiers: []
+  _propertiesModifiers:
+  - {fileID: 11400000, guid: 77baf526674a5f14aa0aa2d79835d095, type: 2}

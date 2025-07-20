@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98b934ca9d5749d7bea6a834b66e4f90, type: 3}
   m_Name: MachineGunAmmo
   m_EditorClassIdentifier: 
-  <Name>k__BackingField: GunAmmo
+  <Name>k__BackingField: MachineGunAmmo
   <Sprite>k__BackingField: {fileID: 21300000, guid: 4756e839ff9f8384dbc2f8c9f1fdbb45, type: 3}
   <CanStack>k__BackingField: 1
   <MaxItemsInStack>k__BackingField: 50

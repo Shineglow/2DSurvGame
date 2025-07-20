@@ -18,6 +18,7 @@ namespace Gameplay.UI.Inventory
         public void Bind(SlotInfo slotInfo)
         {
             _bindedSlotInfo = slotInfo;
+            OnSlotUpdate(slotInfo);
         }
 
         private void OnEnable()
@@ -34,7 +35,7 @@ namespace Gameplay.UI.Inventory
         {
             if (_bindedSlotInfo != slotInfo) return;
 
-            var itemInfo = slotInfo.AbstractItemBase;
+            var itemInfo = slotInfo?.AbstractItemBase;
             if (itemInfo == null)
             {
                 itemView.gameObject.SetActive(false);
@@ -46,17 +47,21 @@ namespace Gameplay.UI.Inventory
                 itemView.gameObject.SetActive(true);
             }
             
-            if (itemInfo != null)
+            if (itemInfo == null)
             {
-                if (itemInfo.CanStack && itemInfo.MaxItemsInStack > 1)
+                count.gameObject.SetActive(false);
+            }
+            else
+            {
+                if (itemInfo.CanStack && itemInfo.MaxItemsInStack > 1 && slotInfo.Count > 1)
                 {
                     count.text = slotInfo.Count.ToString();
                     count.gameObject.SetActive(true);
                 }
-            }
-            else
-            {
-                count.gameObject.SetActive(false);
+                else
+                {
+                    count.gameObject.SetActive(false);
+                }
             }
         }
     }

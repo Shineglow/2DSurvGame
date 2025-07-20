@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Player.Properties;
 using Properties;
 using UnityEngine;
 

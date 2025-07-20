@@ -167,7 +167,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemView: {fileID: 841598204119878062}
   count: {fileID: 8245698644005549972}
-  slotUpdateEvent: {fileID: 0}
+  slotUpdateEvent: {fileID: 11400000, guid: 46467f6888ecec048be6e9ea523af784, type: 2}
 --- !u!1 &3285001011342184344
 GameObject:
   m_ObjectHideFlags: 0

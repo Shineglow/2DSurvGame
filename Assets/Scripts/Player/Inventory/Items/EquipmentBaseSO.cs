@@ -1,6 +1,6 @@
 namespace Player.Inventory.Items
 {
-    public class EquipmentBaseSO : AbstractItemBaseSO
+    public abstract class EquipmentBaseSO : AbstractItemBaseSO
     {
         
     }
